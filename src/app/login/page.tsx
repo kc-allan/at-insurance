@@ -3,11 +3,13 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import toast from 'react-hot-toast'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Phone, Shield } from 'lucide-react'
+import { sendOTP, verifyOTP } from '@/lib/api/auth'
 
 export default function LoginPage() {
   const [phone, setPhone] = useState('')
@@ -17,21 +19,50 @@ export default function LoginPage() {
 
   const handleSendOTP = async () => {
     setIsLoading(true)
-    // Simulate API call
-    setTimeout(() => {
-      setStep('otp')
+    try {
+      const result = await sendOTP(phone)
+      if (result.success && result.otp) {
+        setStep('otp')
+        // Show OTP in toast for development
+        toast.success(`OTP Generated: ${result.otp}`, {
+          duration: 10000, // Show for 10 seconds
+          style: {
+            background: '#2E7D32',
+            color: '#fff',
+            fontSize: '16px',
+            fontWeight: 'bold',
+          },
+        })
+      } else {
+        toast.error('Failed to generate OTP. Please check your phone number.')
+      }
+    } catch (error) {
+      toast.error('Failed to generate OTP. Please try again.')
+    } finally {
       setIsLoading(false)
-    }, 1500)
+    }
   }
 
   const handleVerifyOTP = async () => {
     setIsLoading(true)
-    // Mock authentication - any 6-digit code works
-    setTimeout(() => {
-      // After successful OTP verification, always go to dashboard
-      window.location.href = '/dashboard'
+    try {
+      const result = await verifyOTP(phone, otp)
+      if (result.success) {
+        toast.success('Login successful!')
+        // Redirect based on whether user exists or is new
+        if (result.user) {
+          window.location.href = '/dashboard'
+        } else {
+          window.location.href = '/signup'
+        }
+      } else {
+        toast.error(result.message || 'Invalid OTP. Please try again.')
+      }
+    } catch (error) {
+      toast.error('OTP verification failed. Please try again.')
+    } finally {
       setIsLoading(false)
-    }, 1500)
+    }
   }
 
   const formatPhoneNumber = (value: string) => {

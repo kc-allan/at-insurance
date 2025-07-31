@@ -18,44 +18,55 @@ import {
   PiggyBank
 } from 'lucide-react'
 
-// Mock user data
-const mockUser = {
-  name: 'John Mwangi',
-  phone: '+254712345678',
-  county: 'Nakuru',
-  joinDate: '2024-01-15'
-}
-
-// Mock policies data
-const mockPolicies = [
-  {
-    id: 'POL-001',
-    type: 'crop',
-    product: 'Maize',
-    coverage: '5 acres',
-    premium: 2500,
-    status: 'active',
-    validFrom: '2024-01-01',
-    validTo: '2024-12-31'
-  },
-  {
-    id: 'POL-002',
-    type: 'livestock',
-    product: 'Dairy Cattle',
-    coverage: '3 cows',
-    premium: 1800,
-    status: 'active',
-    validFrom: '2024-02-01',
-    validTo: '2025-01-31'
-  }
-]
+import { getCurrentUser } from '@/lib/api/auth'
+import { getPolicies } from '@/lib/api/policies'
+import { Farmer, Policy } from '@/lib/types'
 
 export default function DashboardPage() {
-  const [user] = useState(mockUser)
-  const [policies] = useState(mockPolicies)
+  const [user, setUser] = useState<Farmer | null>(null)
+  const [policies, setPolicies] = useState<Policy[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        const [userData, policiesData] = await Promise.all([
+          getCurrentUser(),
+          getPolicies()
+        ])
+        
+        setUser(userData)
+        setPolicies(policiesData)
+      } catch (error) {
+        console.error('Error loading dashboard data:', error)
+        // Redirect to login if unauthorized
+        window.location.href = '/login'
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadDashboardData()
+  }, [])
 
   const activePolicies = policies.filter(p => p.status === 'active')
   const totalCoverage = policies.reduce((sum, p) => sum + p.premium, 0)
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Redirecting to login...</p>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

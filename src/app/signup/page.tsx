@@ -3,12 +3,14 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import toast from 'react-hot-toast'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Phone, Shield, User, MapPin, Upload } from 'lucide-react'
+import { sendOTP, registerUser } from '@/lib/api/auth'
 
 const kenyanCounties = [
   'Baringo', 'Bomet', 'Bungoma', 'Busia', 'Elgeyo-Marakwet', 'Embu', 'Garissa', 'Homa Bay',
@@ -53,21 +55,52 @@ export default function SignUpPage() {
 
   const handleSignUp = async () => {
     setIsLoading(true)
-    // Simulate API call for registration
-    setTimeout(() => {
-      setStep('otp')
+    try {
+      const result = await sendOTP(formData.phone)
+      if (result.success && result.otp) {
+        setStep('otp')
+        // Show OTP in toast for development
+        toast.success(`OTP Generated: ${result.otp}`, {
+          duration: 10000, // Show for 10 seconds
+          style: {
+            background: '#2E7D32',
+            color: '#fff',
+            fontSize: '16px',
+            fontWeight: 'bold',
+          },
+        })
+      } else {
+        toast.error('Failed to generate OTP. Please check your phone number.')
+      }
+    } catch (error) {
+      toast.error('Failed to generate OTP. Please try again.')
+    } finally {
       setIsLoading(false)
-    }, 1500)
+    }
   }
 
   const handleVerifyOTP = async () => {
     setIsLoading(true)
-    // Simulate API call for OTP verification
-    setTimeout(() => {
-      // After successful OTP verification, always go to dashboard
-      window.location.href = '/dashboard'
+    try {
+      // First register the user
+      const result = await registerUser({
+        name: formData.fullName,
+        phone: formData.phone,
+        county: formData.county,
+        idDocument: formData.idDocument?.name
+      })
+      
+      if (result.success) {
+        toast.success('Registration successful!')
+        window.location.href = '/dashboard'
+      } else {
+        toast.error(result.message || 'Registration failed. Please try again.')
+      }
+    } catch (error) {
+      toast.error('Registration failed. Please try again.')
+    } finally {
       setIsLoading(false)
-    }, 1500)
+    }
   }
 
   const isFormValid = formData.fullName && formData.phone.length >= 13 && formData.county

@@ -1,75 +1,91 @@
 import { Claim, ClaimForm, APIResponse } from '@/lib/types'
+import { API_BASE_URL, getAuthHeaders } from './config'
 
-// Mock claims database
-const mockClaims: Claim[] = [
-  {
-    id: 'CLM-001',
-    policyId: 'POL-001',
-    farmerId: '1',
-    reason: 'drought',
-    description: 'Severe drought affected maize crop, estimated 80% loss',
-    amount: 2000,
-    status: 'pending',
-    dateSubmitted: '2024-07-15',
-    images: []
-  },
-  {
-    id: 'CLM-002',
-    policyId: 'POL-002',
-    farmerId: '1',
-    reason: 'livestock_death',
-    description: 'One dairy cow died due to illness',
-    amount: 600,
-    status: 'approved',
-    dateSubmitted: '2024-06-20',
-    images: []
+export const getClaims = async (): Promise<Claim[]> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/claims`, {
+      headers: getAuthHeaders(),
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch claims');
+    }
+    
+    return response.json();
+  } catch (error) {
+    console.error('Get claims error:', error);
+    return [];
   }
-]
-
-export const getClaims = async (farmerId: string): Promise<Claim[]> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 800))
-  
-  return mockClaims.filter(claim => claim.farmerId === farmerId)
 }
 
 export const getClaim = async (claimId: string): Promise<Claim | null> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500))
-  
-  return mockClaims.find(claim => claim.id === claimId) || null
+  try {
+    const response = await fetch(`${API_BASE_URL}/claims/${claimId}`, {
+      headers: getAuthHeaders(),
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch claim');
+    }
+    
+    return response.json();
+  } catch (error) {
+    console.error('Get claim error:', error);
+    return null;
+  }
 }
 
 export const submitClaim = async (claimData: ClaimForm): Promise<APIResponse<Claim>> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 2000))
-  
-  // Create new claim
-  const newClaim: Claim = {
-    id: `CLM-${Date.now()}`,
-    policyId: claimData.policyId,
-    farmerId: '1', // Mock current user
-    reason: claimData.reason as any,
-    description: claimData.description,
-    amount: 0, // Will be calculated by insurance company
-    status: 'pending',
-    dateSubmitted: new Date().toISOString().split('T')[0],
-    images: [] // In real app, would handle file uploads
-  }
-  
-  // Add to mock database
-  mockClaims.push(newClaim)
-  
-  return { 
-    success: true, 
-    data: newClaim,
-    message: 'Claim submitted successfully. We will contact you shortly.' 
+  try {
+    const formData = new FormData();
+    formData.append('policyId', claimData.policyId);
+    formData.append('reason', claimData.reason);
+    formData.append('description', claimData.description);
+    
+    // Add images if provided
+    if (claimData.images) {
+      claimData.images.forEach((image, index) => {
+        formData.append('images', image);
+      });
+    }
+
+    const token = localStorage.getItem('auth_token');
+    const response = await fetch(`${API_BASE_URL}/claims`, {
+      method: 'POST',
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to submit claim');
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error('Submit claim error:', error);
+    return { 
+      success: false, 
+      message: error.message || 'Failed to submit claim' 
+    };
   }
 }
 
 export const getClaimsByPolicy = async (policyId: string): Promise<Claim[]> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 500))
-  
-  return mockClaims.filter(claim => claim.policyId === policyId)
+  try {
+    const response = await fetch(`${API_BASE_URL}/claims/by-policy/${policyId}`, {
+      headers: getAuthHeaders(),
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch claims');
+    }
+    
+    return response.json();
+  } catch (error) {
+    console.error('Get claims by policy error:', error);
+    return [];
+  }
 }
