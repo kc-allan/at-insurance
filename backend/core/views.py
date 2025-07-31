@@ -1,3 +1,31 @@
+import random
+from .models import PhoneOTP
+from .africastalking_utils import send_otp_sms
+# OTP request endpoint
+from rest_framework.decorators import api_view
+
+@api_view(['POST'])
+def request_otp(request):
+    phone_number = request.data.get('phone_number')
+    if not phone_number:
+        return Response({'error': 'Phone number required'}, status=400)
+    otp = str(random.randint(100000, 999999))
+    PhoneOTP.objects.update_or_create(phone_number=phone_number, defaults={'otp': otp, 'is_verified': False})
+    send_otp_sms(phone_number, otp)
+    return Response({'message': 'OTP sent'})
+
+# OTP verification endpoint
+@api_view(['POST'])
+def verify_otp(request):
+    phone_number = request.data.get('phone_number')
+    otp = request.data.get('otp')
+    try:
+        record = PhoneOTP.objects.get(phone_number=phone_number, otp=otp)
+        record.is_verified = True
+        record.save()
+        return Response({'message': 'OTP verified'})
+    except PhoneOTP.DoesNotExist:
+        return Response({'error': 'Invalid OTP'}, status=400)
 
 from rest_framework import viewsets, permissions
 from rest_framework.decorators import api_view, permission_classes

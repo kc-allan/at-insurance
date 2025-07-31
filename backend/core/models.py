@@ -1,4 +1,15 @@
 from django.db import models
+from django.utils import timezone
+
+class PhoneOTP(models.Model):
+    phone_number = models.CharField(max_length=15, unique=True)
+    otp = models.CharField(max_length=6)
+    created_at = models.DateTimeField(default=timezone.now)
+    is_verified = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.phone_number} - {self.otp}"
+from django.db import models
 
 from django.contrib.auth import get_user_model
 
