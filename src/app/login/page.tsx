@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -25,9 +26,9 @@ export default function LoginPage() {
 
   const handleVerifyOTP = async () => {
     setIsLoading(true)
-    // Simulate API call
+    // Mock authentication - any 6-digit code works
     setTimeout(() => {
-      // Redirect to dashboard or profile setup
+      // After successful OTP verification, always go to dashboard
       window.location.href = '/dashboard'
       setIsLoading(false)
     }, 1500)
@@ -59,7 +60,7 @@ export default function LoginPage() {
         />
         <div className="absolute inset-0 bg-black/20" />
         <div className="absolute bottom-8 left-8 text-white">
-          <h1 className="text-4xl font-bold mb-2">AgriInsure</h1>
+          <h1 className="text-4xl font-bold mb-2">Africas Insurance</h1>
           <p className="text-lg opacity-90">Protecting Kenya's Farmers</p>
         </div>
       </div>
@@ -164,9 +165,17 @@ export default function LoginPage() {
           </Card>
 
           {/* Footer */}
-          <div className="text-center text-sm text-gray-500">
-            <p>Need help? Call our support line</p>
-            <p className="font-semibold text-primary">+254 700 000 000</p>
+          <div className="text-center space-y-4">
+            <div className="text-sm text-gray-500">
+              <p>Don't have an account?</p>
+              <Link href="/signup" className="font-semibold text-primary hover:underline">
+                Create account here
+              </Link>
+            </div>
+            <div className="text-sm text-gray-500">
+              <p>Need help? Call our support line</p>
+              <p className="font-semibold text-primary">+254 700 000 000</p>
+            </div>
           </div>
         </div>
       </div>
