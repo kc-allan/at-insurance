@@ -1,4 +1,3 @@
-# AgriTech Insurance Providers
 # 🌾 AgriInsure - Farmer Insurance Platform
 
 A responsive farmer-facing agriculture insurance web platform built with React, Next.js, TailwindCSS, and shadcn/ui.
