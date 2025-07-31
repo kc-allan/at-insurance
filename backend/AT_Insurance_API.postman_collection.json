@@ -1,0 +1,563 @@
+{
+  "info": {
+    "name": "AT Insurance API",
+    "description": "Complete API collection for AT Insurance - Farmer Insurance Management System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "at-insurance-api-v1"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "access_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "phone_number",
+      "value": "+254712345678",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "description": "User authentication and profile management endpoints",
+      "item": [
+        {
+          "name": "Send OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone_number\": \"{{phone_number}}\",\n  \"registration\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/accounts/auth/send-otp/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "accounts", "auth", "send-otp", ""]
+            },
+            "description": "Send OTP to phone number for authentication"
+          },
+          "response": []
+        },
+        {
+          "name": "Verify OTP & Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('access_token', response.access);",
+                  "    pm.collectionVariables.set('refresh_token', response.refresh);",
+                  "    console.log('Tokens saved successfully');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone_number\": \"{{phone_number}}\",\n  \"otp_code\": \"123456\",\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\",\n  \"email\": \"john@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/accounts/auth/verify-otp/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "accounts", "auth", "verify-otp", ""]
+            },
+            "description": "Verify OTP and get JWT tokens"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/accounts/profile/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "accounts", "profile", ""]
+            },
+            "description": "Get current user profile"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"county\": \"Nairobi\",\n  \"sub_county\": \"Westlands\",\n  \"farming_type\": \"mixed\",\n  \"farm_size_acres\": 5.0,\n  \"primary_crops\": [\"maize\", \"beans\"],\n  \"years_farming_experience\": 10\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/accounts/profile/update/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "accounts", "profile", "update", ""]
+            },
+            "description": "Update user profile information"
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('access_token', response.access);",
+                  "    pm.collectionVariables.set('refresh_token', response.refresh);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/accounts/auth/refresh/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "accounts", "auth", "refresh", ""]
+            },
+            "description": "Refresh access token"
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/accounts/auth/logout/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "accounts", "auth", "logout", ""]
+            },
+            "description": "Logout and blacklist refresh token"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Policies",
+      "description": "Insurance policy management endpoints",
+      "item": [
+        {
+          "name": "List Policies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/core/policies/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "core", "policies", ""],
+              "query": [
+                {
+                  "key": "policy_type",
+                  "value": "crop",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "maize",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get list of available insurance policies"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Policy Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/core/policies/1/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "core", "policies", "1", ""]
+            },
+            "description": "Get detailed information about a specific policy"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Subscriptions",
+      "description": "Policy subscription management endpoints",
+      "item": [
+        {
+          "name": "List My Subscriptions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/core/subscriptions/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "core", "subscriptions", ""],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "active",
+                  "disabled": true
+                },
+                {
+                  "key": "is_paid",
+                  "value": "true",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get user's subscriptions"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Subscription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"policy\": 1,\n  \"sum_insured\": 50000.00,\n  \"insured_area_acres\": 5.0,\n  \"insured_crop\": \"Maize\",\n  \"start_date\": \"2024-01-01\",\n  \"end_date\": \"2024-12-31\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/core/subscriptions/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "core", "subscriptions", ""]
+            },
+            "description": "Subscribe to an insurance policy"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Active Subscriptions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/core/subscriptions/active/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "core", "subscriptions", "active", ""]
+            },
+            "description": "Get user's currently active subscriptions"
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Subscription",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/core/subscriptions/1/cancel/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "core", "subscriptions", "1", "cancel", ""]
+            },
+            "description": "Cancel an active subscription"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Claims",
+      "description": "Insurance claims management endpoints",
+      "item": [
+        {
+          "name": "List My Claims",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/core/claims/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "core", "claims", ""],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "submitted",
+                  "disabled": true
+                },
+                {
+                  "key": "claim_type",
+                  "value": "crop_loss",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get user's insurance claims"
+          },
+          "response": []
+        },
+        {
+          "name": "File New Claim",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subscription\": 1,\n  \"claim_type\": \"crop_loss\",\n  \"incident_date\": \"2024-01-15\",\n  \"description\": \"Crop destroyed by drought conditions\",\n  \"loss_amount\": 25000.00\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/core/claims/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "core", "claims", ""]
+            },
+            "description": "File a new insurance claim"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Pending Claims",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/core/claims/pending/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "core", "claims", "pending", ""]
+            },
+            "description": "Get user's pending claims"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "description": "Payment and transaction management endpoints",
+      "item": [
+        {
+          "name": "Payment History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/core/payments/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "core", "payments", ""],
+              "query": [
+                {
+                  "key": "payment_type",
+                  "value": "premium",
+                  "disabled": true
+                },
+                {
+                  "key": "payment_method",
+                  "value": "mpesa",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get user's payment history"
+          },
+          "response": []
+        },
+        {
+          "name": "Initiate Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subscription_id\": 1,\n  \"payment_method\": \"mpesa\",\n  \"phone_number\": \"{{phone_number}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/core/initiate-payment/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "core", "initiate-payment", ""]
+            },
+            "description": "Initiate payment for a subscription"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Utilities",
+      "description": "Utility endpoints for calculations and dashboard",
+      "item": [
+        {
+          "name": "Calculate Premium",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"policy_id\": 1,\n  \"sum_insured\": 50000.00\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/core/calculate-premium/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "core", "calculate-premium", ""]
+            },
+            "description": "Calculate premium for a policy and sum insured"
+          },
+          "response": []
+        },
+        {
+          "name": "Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/core/dashboard/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "core", "dashboard", ""]
+            },
+            "description": "Get dashboard statistics for the farmer"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Documents",
+      "description": "Document upload and management endpoints",
+      "item": [
+        {
+          "name": "Upload Document",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "document_type",
+                  "value": "farm_photo",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Photo of maize farm",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/core/documents/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "core", "documents", ""]
+            },
+            "description": "Upload a document"
+          },
+          "response": []
+        },
+        {
+          "name": "List Documents",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/core/documents/",
+              "host": ["{{base_url}}"],
+              "path": ["api", "core", "documents", ""],
+              "query": [
+                {
+                  "key": "document_type",
+                  "value": "farm_photo",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get user's uploaded documents"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,13 +1,22 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import PolicyViewSet, mpesa_stk_push, request_otp, verify_otp
+from .views import PolicyViewSet
 
 router = DefaultRouter()
 router.register(r'policies', PolicyViewSet, basename='policy')
+router.register(r'subscriptions', SubscriptionViewSet, basename='subscription')
+router.register(r'claims', ClaimViewSet, basename='claim')
+router.register(r'payments', PaymentViewSet, basename='payment')
+router.register(r'documents', DocumentViewSet, basename='document')
 
 urlpatterns = [
     path('mpesa/stkpush/', mpesa_stk_push, name='mpesa_stk_push'),
     path('auth/request-otp/', request_otp, name='request_otp'),
     path('auth/verify-otp/', verify_otp, name='verify_otp'),
     path('', include(router.urls)),
+    
+    # Additional API endpoints
+    path('calculate-premium/', calculate_premium, name='calculate-premium'),
+    path('initiate-payment/', initiate_payment, name='initiate-payment'),
+    path('dashboard/', dashboard_stats, name='dashboard-stats'),
 ]
