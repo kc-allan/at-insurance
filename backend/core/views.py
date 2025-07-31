@@ -23,6 +23,6 @@ def mpesa_stk_push(request):
     amount = request.data.get('amount', 1)
     account_reference = request.data.get('account_reference', 'Test')
     transaction_desc = request.data.get('transaction_desc', 'Payment')
-    callback_url = request.data.get('callback_url', 'https://mydomain.com/mpesa/callback/')
+    callback_url = request.data.get('callback_url', 'http://localhost:8000/api/core/mpesa/callback/')
     result = lipa_na_mpesa_online(phone_number, amount, account_reference, transaction_desc, callback_url)
     return Response(result, status=status.HTTP_200_OK)
